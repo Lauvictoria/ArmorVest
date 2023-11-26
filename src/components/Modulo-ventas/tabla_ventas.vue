@@ -374,24 +374,25 @@ export default {
       this.close();
     },
     descargarExcell() {
-  const data = this.showFilter ? this.filteredDesserts : this.desserts;
+      console.log('exportar')
+  // const data = this.showFilter ? this.filteredDesserts : this.desserts;
 
-  const options = {
-    data: data.map(item => ({
-      Clientes: item.name,
-      Producto: item.producto,
-      Talla: item.talla,
-      Factura: item.factura,
-      GD: item.gd,
-      Vencimiento: item.vencimiento,
-      Vendedor: item.vendedor,
-      Comentarios: item.comentarios,
-    })),
-    fileName: 'ventas',
-    exportType: exportFromJSON.types.xls,
-  };
+  // const options = {
+  //   data: data.map(item => ({
+  //     Clientes: item.name,
+  //     Producto: item.producto,
+  //     Talla: item.talla,
+  //     Factura: item.factura,
+  //     GD: item.gd,
+  //     Vencimiento: item.vencimiento,
+  //     Vendedor: item.vendedor,
+  //     Comentarios: item.comentarios,
+  //   })),
+  //   fileName: 'ventas',
+  //   exportType: exportFromJSON.types.xls,
+  // };
 
-  exportFromJSON(options);
+  // exportFromJSON(options);
 
    
 },
