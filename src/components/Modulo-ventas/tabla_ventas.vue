@@ -1,8 +1,21 @@
 <template>
-  <v-data-table :headers="headers" :items="desserts" :sort-by="[{ key: 'producto', order: 'asc' }]">
+  <v-data-table
+    :headers="headers"
+    :items="search ? filteredDesserts : desserts"
+    :sort-by="[{ key: 'producto', order: 'asc' }]"
+  >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-toolbar-title>Registro de ventas</v-toolbar-title>
+        <v-text-field
+          v-model="search"
+          prepend-inner-icon="mdi-magnify"
+          density="compact"
+          label="Search"
+          single-line
+          flat
+          hide-details
+          variant="solo-filled"
+        ></v-text-field>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
         <v-dialog v-model="dialog" max-width="500px">
@@ -12,17 +25,24 @@
               color="black"
               dark
               class="mb-2"
-              v-bind="props"
               icon="mdi-filter"
               @click="toggleFilter"
-            ></v-btn>
+            >
+            </v-btn>
 
-            <v-btn color="black" dark class="mb-2" v-bind="props" icon="mdi-plus"></v-btn>
+            <v-btn
+              color="black"
+              dark
+              class="mb-2"
+              v-bind="props"
+              icon="mdi-plus"
+            >
+            </v-btn>
+
             <v-btn
               color="Black"
               dark
               class="mb-2"
-              v-bind="props"
               icon="mdi-upload"
               @click="descargarExcell()"
             ></v-btn>
@@ -36,28 +56,59 @@
               <v-container>
                 <v-row>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.name" label="Cliente"></v-text-field>
+                    <v-text-field
+                      v-model="editedItem.name"
+                      label="Cliente"
+                    ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.producto" label="Producto"></v-text-field>
+                    <v-text-field
+                      v-model="editedItem.producto"
+                      label="Producto"
+                    ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.talla" label="Talla"></v-text-field>
+                    <v-text-field
+                      v-model="editedItem.talla"
+                      label="Talla"
+                    ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.factura" label="Factura"></v-text-field>
+                    <v-text-field
+                      v-model="editedItem.factura"
+                      label="Factura"
+                    ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.gd" label="GD"></v-text-field>
+                    <v-text-field
+                      v-model="editedItem.gd"
+                      label="GD"
+                    ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.vencimiento" label="Vencimiento"></v-text-field>
+                    <v-text-field
+                      v-model="editedItem.vencimiento"
+                      label="Vencimiento"
+                    ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.vendedor" label="Vendedor"></v-text-field>
+                    <v-text-field
+                      v-model="editedItem.vendedor"
+                      label="Vendedor"
+                    ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="8">
-                    <v-text-field v-model="editedItem.comentarios" label="Comentarios"></v-text-field>
+                    <v-text-field
+                      v-model="editedItem.comentarios"
+                      label="Comentarios"
+                    ></v-text-field>
+                    <v-file-input
+                      v-model="editedItem.archivoAdjunto"
+                      label="Adjuntar Archivo"
+                      show-size
+                      show-overflow
+                      accept=".pdf, .doc, .docx, .jpg, .jpeg, .png"
+                    ></v-file-input>
                   </v-col>
                 </v-row>
               </v-container>
@@ -65,33 +116,56 @@
 
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="blue-darken-1" variant="text" @click="close">Cancelar</v-btn>
-              <v-btn color="blue-darken-1" variant="text" @click="save">Guardar</v-btn>
+              <v-btn color="blue-darken-1" variant="text" @click="close"
+                >Cancelar</v-btn
+              >
+              <v-btn color="blue-darken-1" variant="text" @click="save"
+                >Guardar</v-btn
+              >
             </v-card-actions>
           </v-card>
         </v-dialog>
 
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
-            <v-card-title class="text-h5">¿Seguro que desea eliminar el registro?</v-card-title>
+            <v-card-title class="text-h5"
+              >¿Seguro que desea eliminar el registro?</v-card-title
+            >
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancelar</v-btn>
-              <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">Seguro</v-btn>
+              <v-btn color="blue-darken-1" variant="text" @click="closeDelete"
+                >Cancelar</v-btn
+              >
+              <v-btn
+                color="blue-darken-1"
+                variant="text"
+                @click="deleteItemConfirm"
+                >Seguro</v-btn
+              >
               <v-spacer></v-spacer>
             </v-card-actions>
           </v-card>
         </v-dialog>
       </v-toolbar>
     </template>
+    
     <template v-slot:item.actions="{ item }">
-      <v-icon size="small" class="me-2" @click="viewItem(item)" color="black">mdi-eye</v-icon>
-      <v-icon size="small" class="me-2" @click="editItem(item)" color="black">mdi-pencil</v-icon>
-      <v-icon size="small" @click="deleteItem(item)" color="black">mdi-delete</v-icon>
+      <v-icon size="small" class="me-2" @click="viewItem(item)" color="black"
+        >mdi-eye</v-icon
+      >
+      <v-icon size="small" class="me-2" @click="editItem(item)" color="black"
+        >mdi-pencil</v-icon
+      >
+      <v-icon size="small" @click="deleteItem(item)" color="black"
+        >mdi-delete</v-icon
+      >
     </template>
+    
     <template v-slot:no-data>
       <v-btn color="primary" @click="initialize">Reset</v-btn>
     </template>
+    
+    
   </v-data-table>
 </template>
 <script>
@@ -100,16 +174,18 @@ import exportFromJSON from "export-from-json";
 export default {
   data: () => ({
     filteredDesserts: [],
+    search: "",
     showFilter: false,
     dialog: false,
     dialogDelete: false,
     dialogView: false,
+
     headers: [
       {
         title: "Clientes",
         align: "start",
         sortable: false,
-        key: "name"
+        key: "name",
       },
       { title: "Producto", key: "producto" },
       { title: "Talla", key: "talla" },
@@ -118,7 +194,8 @@ export default {
       { title: "Vencimiento", key: "vencimiento" },
       { title: "Vendedor", key: "vendedor" },
       { title: "Comentarios", key: "comentarios" },
-      { title: "Acción", key: "actions", sortable: false }
+      { title: "Acción", key: "actions", sortable: false },
+      { title: "Adjunto", key: "archivoAdjunto", sortable: false },
     ],
     desserts: [],
     editedIndex: -1,
@@ -130,7 +207,8 @@ export default {
       gd: 0,
       vencimiento: 0,
       vendedor: "",
-      comentarios: ""
+      comentarios: "",
+       archivoAdjunto: null,
     },
     defaultItem: {
       name: "",
@@ -140,14 +218,15 @@ export default {
       gd: 0,
       vencimiento: 0,
       vendedor: "",
-      comentarios: ""
-    }
+      comentarios: "",
+       archivoAdjunto: null,
+    },
   }),
 
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "Nuevo Registro" : "Editar Registro";
-    }
+    },
   },
 
   watch: {
@@ -156,7 +235,12 @@ export default {
     },
     dialogDelete(val) {
       val || this.closeDelete();
-    }
+    },
+    search: function (newSearch) {
+      this.filteredDesserts = this.desserts.filter((item) => {
+        return item.name.toLowerCase().includes(newSearch.toLowerCase());
+      });
+    },
   },
 
   created() {
@@ -174,7 +258,7 @@ export default {
           gd: 4.0,
           vencimiento: 23,
           vendedor: "Veronica",
-          comentarios: ""
+          comentarios: "",
         },
         {
           name: "Banco Falabella",
@@ -184,7 +268,7 @@ export default {
           gd: 4.3,
           vencimiento: 24,
           vendedor: "Mileydis",
-          comentarios: ""
+          comentarios: "",
         },
         {
           name: "Prosegur",
@@ -194,7 +278,7 @@ export default {
           gd: 6.0,
           vencimiento: 23,
           vendedor: "Veronica",
-          comentarios: ""
+          comentarios: "",
         },
         {
           name: "Banco Ripley",
@@ -204,7 +288,7 @@ export default {
           gd: 4.3,
           vencimiento: 23,
           vendedor: "Veronica",
-          comentarios: ""
+          comentarios: "",
         },
         {
           name: "Muni Las Condes",
@@ -214,7 +298,7 @@ export default {
           gd: 3.9,
           vencimiento: 26,
           vendedor: "Mileydis",
-          comentarios: ""
+          comentarios: "",
         },
         {
           name: "Muni La Serena",
@@ -224,7 +308,7 @@ export default {
           gd: 0.0,
           vencimiento: 26,
           vendedor: "Mileydis",
-          comentarios: ""
+          comentarios: "",
         },
         {
           name: "Banco Ripley",
@@ -234,7 +318,7 @@ export default {
           gd: 0,
           vencimiento: 25,
           vendedor: "Mileydis",
-          comentarios: ""
+          comentarios: "",
         },
         {
           name: "Prosegur",
@@ -244,7 +328,7 @@ export default {
           gd: 6.5,
           vencimiento: 25,
           vendedor: "Veronica",
-          comentarios: ""
+          comentarios: "",
         },
         {
           name: "Banco Santander",
@@ -254,7 +338,7 @@ export default {
           gd: 4.9,
           vencimiento: 28,
           vendedor: "Mileydis",
-          comentarios: ""
+          comentarios: "",
         },
         {
           name: "Muni Lo Ovalle",
@@ -264,8 +348,8 @@ export default {
           gd: 7,
           vencimiento: 28,
           vendedor: "Veronica",
-          comentarios: ""
-        }
+          comentarios: "",
+        },
       ];
     },
 
@@ -314,44 +398,14 @@ export default {
         this.desserts.push(this.editedItem);
       }
       this.close();
+      this.editedItem.archivoAdjunto = null;
     },
     descargarExcell() {
-      console.log("exportar a excel");
       const data = this.showFilter ? this.filteredDesserts : this.desserts;
-
-      // const options = {
-      //   data: data.map(item => ({
-      //     Clientes: item.name,
-      //     Producto: item.producto,
-      //     Talla: item.talla,
-      //     Factura: item.factura,
-      //     GD: item.gd,
-      //     Vencimiento: item.vencimiento,
-      //     Vendedor: item.vendedor,
-      //     Comentarios: item.comentarios,
-      //   })),
-      //   fileName: 'ventas',
-      //   exportType: exportXlsFile.types.xlsx,
-      // }
-
-      const fileName = "download";
+      const fileName = "RegistroVentas";
       const exportType = exportFromJSON.types.xls;
       exportFromJSON({ data, fileName, exportType });
-
-      console.log("desde json");
-    }
+    },
   },
-  toggleFilter() {
-    if (this.showFilter) {
-      // Aplicar filtro si está activado
-      this.filteredDesserts = this.desserts.filter(item => {
-        // Reemplaza 'texto_a_filtrar' con el texto real que estás buscando
-        return item.name.toLowerCase().includes(this.desserts.toLowerCase());
-      });
-    } else {
-      // Limpiar el filtro si está desactivado
-      this.filteredDesserts = [];
-    }
-  }
 };
 </script>
