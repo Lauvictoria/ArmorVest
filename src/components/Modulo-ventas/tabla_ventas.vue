@@ -18,7 +18,60 @@
         ></v-text-field>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
-        <v-dialog v-model="dialog" max-width="500px">
+        <v-menu
+          v-model="showFilterMenu"
+          offset-y
+          :close-on-content-click="false"
+        >
+          <v-list>
+            <!-- Opciones de filtrado -->
+            <v-list-item @click="resetFilters">
+              <v-list-item-title>Resetear</v-list-item-title>
+            </v-list-item>
+            <v-divider></v-divider>
+            <v-list-item>
+              <v-text-field
+                v-model="filterByCliente"
+                label="Cliente"
+                dense
+              ></v-text-field>
+            </v-list-item>
+            <v-list-item>
+              <v-text-field
+                v-model="filterByVendedor"
+                label="Vendedor"
+                dense
+              ></v-text-field>
+            </v-list-item>
+            <v-list-item>
+              <v-text-field
+                v-model="filterByProducto"
+                label="Producto"
+                dense
+              ></v-text-field>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <v-dialog v-model="dialogView" max-width="800px">
+          <v-card>
+            <v-card-title class="text-h5"
+              >Vista previa del Archivo Adjunto</v-card-title
+            >
+            <v-card-text>
+              <v-img
+                :src="editedItem.archivoAdjunto"
+                max-width="100%"
+                max-height="600"
+              ></v-img>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn color="blue-darken-1" variant="text" @click="closeView"
+                >Cerrar</v-btn
+              >
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-dialog v-model="dialog" max-width="1000px">
           <!-- boton registrar -->
           <template v-slot:activator="{ props }">
             <v-btn
@@ -26,7 +79,7 @@
               dark
               class="mb-2"
               icon="mdi-filter"
-              @click="toggleFilter"
+              @click="showFilterMenu = !showFilterMenu"
             >
             </v-btn>
 
@@ -89,6 +142,7 @@
                     <v-text-field
                       v-model="editedItem.vencimiento"
                       label="Vencimiento"
+                      type="date"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
@@ -108,7 +162,8 @@
                       show-size
                       show-overflow
                       accept=".pdf, .doc, .docx, .jpg, .jpeg, .png"
-                    ></v-file-input>
+                    >
+                    </v-file-input>
                   </v-col>
                 </v-row>
               </v-container>
@@ -148,11 +203,8 @@
         </v-dialog>
       </v-toolbar>
     </template>
-    
+
     <template v-slot:item.actions="{ item }">
-      <v-icon size="small" class="me-2" @click="viewItem(item)" color="black"
-        >mdi-eye</v-icon
-      >
       <v-icon size="small" class="me-2" @click="editItem(item)" color="black"
         >mdi-pencil</v-icon
       >
@@ -160,12 +212,21 @@
         >mdi-delete</v-icon
       >
     </template>
-    
+
     <template v-slot:no-data>
       <v-btn color="primary" @click="initialize">Reset</v-btn>
     </template>
-    
-    
+    <template v-slot:item.archivoAdjunto="{ item }">
+      <v-row justify="center">
+        <v-icon
+          size="small"
+          class="me-2"
+          @click="viewAttachment(item)"
+          color="black"
+          >mdi-eye</v-icon
+        >
+      </v-row>
+    </template>
   </v-data-table>
 </template>
 <script>
@@ -175,7 +236,7 @@ export default {
   data: () => ({
     filteredDesserts: [],
     search: "",
-    showFilter: false,
+    showFilterMenu: false,
     dialog: false,
     dialogDelete: false,
     dialogView: false,
@@ -205,10 +266,10 @@ export default {
       talla: "",
       factura: 0,
       gd: 0,
-      vencimiento: 0,
+      vencimiento: new Date(),
       vendedor: "",
       comentarios: "",
-       archivoAdjunto: null,
+      archivoAdjunto: null,
     },
     defaultItem: {
       name: "",
@@ -216,10 +277,10 @@ export default {
       talla: "",
       factura: 0,
       gd: 0,
-      vencimiento: 0,
+      vencimiento: new Date(),
       vendedor: "",
       comentarios: "",
-       archivoAdjunto: null,
+      archivoAdjunto: null,
     },
   }),
 
@@ -256,9 +317,10 @@ export default {
           talla: "L",
           factura: 24,
           gd: 4.0,
-          vencimiento: 23,
+          vencimiento: null,
           vendedor: "Veronica",
           comentarios: "",
+          archivoAdjunto: null,
         },
         {
           name: "Banco Falabella",
@@ -266,9 +328,10 @@ export default {
           talla: "M",
           factura: 37,
           gd: 4.3,
-          vencimiento: 24,
+          vencimiento: null,
           vendedor: "Mileydis",
           comentarios: "",
+          archivoAdjunto: null,
         },
         {
           name: "Prosegur",
@@ -276,9 +339,10 @@ export default {
           talla: "L",
           factura: 23,
           gd: 6.0,
-          vencimiento: 23,
+          vencimiento: null,
           vendedor: "Veronica",
           comentarios: "",
+          archivoAdjunto: null,
         },
         {
           name: "Banco Ripley",
@@ -286,9 +350,10 @@ export default {
           talla: "S",
           factura: 67,
           gd: 4.3,
-          vencimiento: 23,
+          vencimiento: null,
           vendedor: "Veronica",
           comentarios: "",
+          archivoAdjunto: null,
         },
         {
           name: "Muni Las Condes",
@@ -296,9 +361,10 @@ export default {
           talla: "M",
           factura: 49,
           gd: 3.9,
-          vencimiento: 26,
+          vencimiento: null,
           vendedor: "Mileydis",
           comentarios: "",
+          archivoAdjunto: null,
         },
         {
           name: "Muni La Serena",
@@ -306,9 +372,10 @@ export default {
           talla: "XL",
           factura: 94,
           gd: 0.0,
-          vencimiento: 26,
+          vencimiento: null,
           vendedor: "Mileydis",
           comentarios: "",
+          archivoAdjunto: null,
         },
         {
           name: "Banco Ripley",
@@ -316,9 +383,10 @@ export default {
           talla: "M",
           factura: 98,
           gd: 0,
-          vencimiento: 25,
+          vencimiento: null,
           vendedor: "Mileydis",
           comentarios: "",
+          archivoAdjunto: null,
         },
         {
           name: "Prosegur",
@@ -326,9 +394,10 @@ export default {
           talla: "S",
           factura: 87,
           gd: 6.5,
-          vencimiento: 25,
+          vencimiento: null,
           vendedor: "Veronica",
           comentarios: "",
+          archivoAdjunto: null,
         },
         {
           name: "Banco Santander",
@@ -336,9 +405,10 @@ export default {
           talla: "L",
           factura: 51,
           gd: 4.9,
-          vencimiento: 28,
+          vencimiento: null,
           vendedor: "Mileydis",
           comentarios: "",
+          archivoAdjunto: null,
         },
         {
           name: "Muni Lo Ovalle",
@@ -346,9 +416,10 @@ export default {
           talla: "XL",
           factura: 65,
           gd: 7,
-          vencimiento: 28,
+          vencimiento: null,
           vendedor: "Veronica",
           comentarios: "",
+          archivoAdjunto: null,
         },
       ];
     },
@@ -406,6 +477,23 @@ export default {
       const exportType = exportFromJSON.types.xls;
       exportFromJSON({ data, fileName, exportType });
     },
+    viewAttachment(item) {
+      this.editedItem = Object.assign({}, item);
+      this.dialogView = true;
+    },
+    resetFilters() {
+      this.filterByName = "";
+      this.filterByVendedor = "";
+      this.filterByProducto = "";
+      this.showFilterMenu = false;
+    },
+    closeView() {
+      this.dialogView = false;
+    },
   },
 };
 </script>
+
+
+<style>
+</style>

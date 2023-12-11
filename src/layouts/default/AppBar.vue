@@ -9,11 +9,13 @@
         :rail="rail"
         permanent
         @click="rail = false"
+        color= 'grey-lighten-5'
       >
-        <v-list-item prepend-avatar=" ccount_circle" title="" nav>
-          <v-avatar color="teal">
-            <span class="white--text headline">C</span>
+        <v-list-item density="compact" nav>
+          <v-avatar color="amber">
+            <span class="white--text headline"> AA </span>
           </v-avatar>
+          
           <template v-slot:append > 
             
             <v-btn
@@ -28,28 +30,34 @@
 
         <v-list density="compact" nav>
           <v-list-item
-            prepend-icon="mdi-view-dashboard"
+            prepend-icon="mdi-chart-bar"
             title="Dashboard"
             value="Home"
             to="/"
           ></v-list-item>
           <v-list-item
-            prepend-icon="mdi-star"
+            prepend-icon="mdi-store"
             title="Ventas"
             value="Ventas"
             to="/ventas"
           ></v-list-item>
           <v-list-item
-            prepend-icon="mdi-account-group-outline"
+            prepend-icon="mdi-headset"
             title="Clientes"
             value="clientes"
             to="/clientes"
           ></v-list-item>
           <v-list-item
-            prepend-icon="mdi-folder-outline"
+            prepend-icon="mdi-package"
             title="Productos"
             value="productos"
             to="/productos"
+          ></v-list-item>
+          <v-list-item
+            prepend-icon="mdi-account-group"
+            title="Usuarios"
+            value="usuarios"
+            to="/usuarios"
           ></v-list-item>
         </v-list>
       </v-navigation-drawer>
